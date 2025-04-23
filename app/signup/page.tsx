@@ -8,6 +8,7 @@ export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resetMode, setResetMode] = useState(false)
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -27,12 +28,31 @@ export default function SignUp() {
     setLoading(false)
   }
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    })
+
+    if (error) {
+      alert(error.message)
+    } else {
+      alert('Vérifiez votre email pour réinitialiser votre mot de passe')
+      setResetMode(false)
+    }
+    setLoading(false)
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full space-y-8">
-        <h2 className="text-center text-3xl font-bold">Créer un compte</h2>
+        <h2 className="text-center text-3xl font-bold">
+          {resetMode ? 'Réinitialiser le mot de passe' : 'Créer un compte'}
+        </h2>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSignUp}>
+        <form className="mt-8 space-y-6" onSubmit={resetMode ? handleResetPassword : handleSignUp}>
           <div>
             <label>Email</label>
             <input
@@ -44,23 +64,41 @@ export default function SignUp() {
             />
           </div>
 
-          <div>
-            <label>Mot de passe</label>
-            <input
-              type="password"
-              required
-              className="w-full p-2 border rounded"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          {!resetMode && (
+            <div>
+              <label>Mot de passe</label>
+              <input
+                type="password"
+                required
+                className="w-full p-2 border rounded"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white p-2 rounded"
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
           >
-            {loading ? 'Création...' : 'Créer un compte'}
+            {loading 
+              ? 'Création...' 
+              : resetMode 
+                ? 'Envoyer le lien de réinitialisation'
+                : 'Créer un compte'
+            }
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setResetMode(!resetMode)}
+            className="w-full text-blue-500 hover:text-blue-600"
+          >
+            {resetMode 
+              ? 'Retour à la connexion' 
+              : 'Mot de passe oublié ?'
+            }
           </button>
 
           <Link href="/login" className="block text-center text-blue-500">
