@@ -1,6 +1,8 @@
+import MainLayout from './layouts/MainLayout'
+
 export default function Home() {
   return (
-    <div>
+    <MainLayout>
       <main className="max-w-6xl mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-center mb-8">
           Bienvenue sur MonApp
@@ -12,6 +14,6 @@ export default function Home() {
           </p>
         </div>
       </main>
-    </div>
+    </MainLayout>
   )
 }
