@@ -1,42 +1,20 @@
-'use client'
+import Navbar from './components/Navbar'
 
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
-
-type User = {
-  id: number
-  name: string
-}
-
-export default function HomePage() {
-  const [users, setUsers] = useState<User[]>([])
-
-  useEffect(() => {
-    async function fetchUsers() {
-      const { data, error } = await supabase.from('users').select('*')
-      if (error) {
-        console.error('Erreur Supabase :', error)
-      } else {
-        setUsers(data || [])
-      }
-    }
-
-    fetchUsers()
-  }, [])
-
+export default function Home() {
   return (
-    <main style={{ padding: '2rem' }}>
-      <h1>Liste des utilisateurs</h1>
-      {users.length === 0 ? (
-        <p>Aucun utilisateur trouvé.</p>
-      ) : (
-        <ul>
-          {users.map((u) => (
-            <li key={u.id}>{u.name}</li>
-          ))}
-        </ul>
-      )}
-    </main>
+    <div>
+      <Navbar />
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <h1 className="text-4xl font-bold text-center mb-8">
+          Bienvenue sur MonApp
+        </h1>
+        
+        <div className="text-center">
+          <p className="text-xl text-gray-600 mb-4">
+            Une application moderne pour gérer vos projets
+          </p>
+        </div>
+      </main>
+    </div>
   )
 }
-
