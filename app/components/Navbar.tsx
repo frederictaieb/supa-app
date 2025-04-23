@@ -14,7 +14,7 @@ export default function Navbar() {
 
           <div className="flex items-center">
             <Link 
-              href="/signup"
+              href="/login"
               className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
             >
               Sign in
