@@ -3,7 +3,6 @@ import Navbar from './components/Navbar'
 export default function Home() {
   return (
     <div>
-      <Navbar />
       <main className="max-w-6xl mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-center mb-8">
           Bienvenue sur MonApp
