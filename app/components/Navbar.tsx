@@ -1,9 +1,9 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { User } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
@@ -97,7 +97,8 @@ function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) 
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  const fetchProfile = async () => {
+  // Utilisation de useCallback pour fetchProfile
+  const fetchProfile = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -112,35 +113,11 @@ function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) 
     } finally {
       setLoading(false)
     }
-  }
+  }, [user.id])
 
   useEffect(() => {
     fetchProfile()
-  }, [fetchProfile]) // Ajout de fetchProfile comme dépendance
-
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          ...profile,
-          updated_at: new Date().toISOString()
-        })
-
-      if (error) throw error
-      alert('Profil mis à jour!')
-    } catch (error) {
-      console.error('Erreur:', error)
-    }
-  }
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    onClose()
-    router.push('/')
-  }
+  }, [fetchProfile])
 
   if (loading) {
     return <div className="p-6">Chargement...</div>
@@ -148,7 +125,65 @@ function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) 
 
   return (
     <div className="p-6">
-      {/* ... reste du code inchangé ... */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Mon Profil</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form onSubmit={async (e) => {
+        e.preventDefault()
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .upsert({
+              id: user.id,
+              ...profile,
+              updated_at: new Date().toISOString()
+            })
+
+          if (error) throw error
+          alert('Profil mis à jour!')
+        } catch (error) {
+          console.error('Erreur:', error)
+        }
+      }} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Prénom</label>
+          <input
+            type="text"
+            value={profile.firstname}
+            onChange={e => setProfile({...profile, firstname: e.target.value})}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* ... autres champs du formulaire ... */}
+
+        <div className="flex space-x-4">
+          <button
+            type="submit"
+            className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          >
+            Mettre à jour
+          </button>
+          <button
+            type="button"
+            onClick={async () => {
+              await supabase.auth.signOut()
+              onClose()
+              router.push('/')
+            }}
+            className="flex-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+          >
+            Déconnexion
+          </button>
+        </div>
+      </form>
     </div>
   )
 }
