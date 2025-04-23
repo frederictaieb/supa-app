@@ -18,7 +18,6 @@ export default function Navbar() {
       setUser(session?.user ?? null)
     })
 
-    // Fermer la modale quand on clique en dehors
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         setIsModalOpen(false)
@@ -37,13 +36,6 @@ export default function Navbar() {
     setUser(user)
   }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setIsModalOpen(false)
-    router.push('/')
-  }
-
-  // Fonction pour obtenir les initiales
   const getInitials = (email: string) => {
     return email.substring(0, 2).toUpperCase()
   }
@@ -68,29 +60,15 @@ export default function Navbar() {
                   {getInitials(user.email || '')}
                 </button>
 
-                {/* Modal/Dropdown */}
+                {/* Modal avec la page de profil */}
                 {isModalOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5">
-                    <div className="px-4 py-2 border-b">
-                      <p className="text-sm text-gray-700 truncate">
-                        {user.email}
-                      </p>
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+                      <ProfileContent 
+                        user={user} 
+                        onClose={() => setIsModalOpen(false)}
+                      />
                     </div>
-                    
-                    <Link
-                      href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsModalOpen(false)}
-                    >
-                      Profile
-                    </Link>
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Déconnexion
-                    </button>
                   </div>
                 )}
               </div>
@@ -106,5 +84,164 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+  )
+}
+
+// Composant pour le contenu du profil
+function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) {
+  const [profile, setProfile] = useState({
+    firstname: '',
+    lastname: '',
+    description: '',
+    date_of_birth: '',
+    broadcasting: false,
+    level: 1
+  })
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    fetchProfile()
+  }, [])
+
+  const fetchProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (error) throw error
+      if (data) setProfile(data)
+    } catch (error) {
+      console.error('Erreur:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          ...profile,
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+      alert('Profil mis à jour!')
+    } catch (error) {
+      console.error('Erreur:', error)
+    }
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    onClose()
+    router.push('/')
+  }
+
+  if (loading) {
+    return <div className="p-6">Chargement...</div>
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Mon Profil</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form onSubmit={handleUpdate} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Prénom</label>
+          <input
+            type="text"
+            value={profile.firstname}
+            onChange={e => setProfile({...profile, firstname: e.target.value})}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Nom</label>
+          <input
+            type="text"
+            value={profile.lastname}
+            onChange={e => setProfile({...profile, lastname: e.target.value})}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <textarea
+            value={profile.description}
+            onChange={e => setProfile({...profile, description: e.target.value})}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            rows={3}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Date de naissance</label>
+          <input
+            type="date"
+            value={profile.date_of_birth}
+            onChange={e => setProfile({...profile, date_of_birth: e.target.value})}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            checked={profile.broadcasting}
+            onChange={e => setProfile({...profile, broadcasting: e.target.checked})}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label className="ml-2 block text-sm text-gray-900">
+            Activer la diffusion
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Niveau</label>
+          <input
+            type="number"
+            value={profile.level}
+            onChange={e => setProfile({...profile, level: parseInt(e.target.value)})}
+            min="1"
+            max="100"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex space-x-4">
+          <button
+            type="submit"
+            className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+          >
+            Mettre à jour
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+          >
+            Déconnexion
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }
