@@ -3,16 +3,15 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { User } from '@supabase/supabase-js'  // Importation du type User
 
 export default function Navbar() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)  // Type correct pour l'utilisateur
   const router = useRouter()
 
   useEffect(() => {
-    // Vérifie l'état de connexion au chargement
     checkUser()
     
-    // Écoute les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
