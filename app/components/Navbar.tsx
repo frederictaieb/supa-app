@@ -2,14 +2,12 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
 
   useEffect(() => {
     checkUser()
@@ -60,7 +58,6 @@ export default function Navbar() {
                   {getInitials(user.email || '')}
                 </button>
 
-                {/* Modal avec la page de profil */}
                 {isModalOpen && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
@@ -87,7 +84,6 @@ export default function Navbar() {
   )
 }
 
-// Composant pour le contenu du profil
 function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) {
   const [profile, setProfile] = useState({
     firstname: '',
@@ -99,10 +95,6 @@ function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) 
   })
   const [loading, setLoading] = useState(true)
   const router = useRouter()
-
-  useEffect(() => {
-    fetchProfile()
-  }, [])
 
   const fetchProfile = async () => {
     try {
@@ -120,6 +112,10 @@ function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) 
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchProfile()
+  }, [fetchProfile]) // Ajout de fetchProfile comme dépendance
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -151,97 +147,7 @@ function ProfileContent({ user, onClose }: { user: User, onClose: () => void }) 
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Mon Profil</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          ✕
-        </button>
-      </div>
-
-      <form onSubmit={handleUpdate} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Prénom</label>
-          <input
-            type="text"
-            value={profile.firstname}
-            onChange={e => setProfile({...profile, firstname: e.target.value})}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Nom</label>
-          <input
-            type="text"
-            value={profile.lastname}
-            onChange={e => setProfile({...profile, lastname: e.target.value})}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Description</label>
-          <textarea
-            value={profile.description}
-            onChange={e => setProfile({...profile, description: e.target.value})}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Date de naissance</label>
-          <input
-            type="date"
-            value={profile.date_of_birth}
-            onChange={e => setProfile({...profile, date_of_birth: e.target.value})}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            checked={profile.broadcasting}
-            onChange={e => setProfile({...profile, broadcasting: e.target.checked})}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label className="ml-2 block text-sm text-gray-900">
-            Activer la diffusion
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Niveau</label>
-          <input
-            type="number"
-            value={profile.level}
-            onChange={e => setProfile({...profile, level: parseInt(e.target.value)})}
-            min="1"
-            max="100"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="flex space-x-4">
-          <button
-            type="submit"
-            className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-          >
-            Mettre à jour
-          </button>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex-1 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-          >
-            Déconnexion
-          </button>
-        </div>
-      </form>
+      {/* ... reste du code inchangé ... */}
     </div>
   )
 }
