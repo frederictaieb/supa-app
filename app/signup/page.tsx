@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { AuthError } from '@supabase/supabase-js'
 import Link from 'next/link'
 
 type SignUpFormData = {
