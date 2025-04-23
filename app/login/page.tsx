@@ -2,119 +2,112 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { AuthError } from '@supabase/supabase-js'
 import Link from 'next/link'
 
-type LoginFormData = {
-  email: string
-  password: string
-}
-
 export default function Login() {
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: ''
-  })
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [resetMode, setResetMode] = useState(false)  // Pour basculer entre login et reset
   const router = useRouter()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
-
+  // Fonction pour la connexion normale
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-      if (error) throw error
-      
+    if (error) {
+      alert(error.message)
+    } else {
       router.push('/profile')
-      router.refresh()
-    } catch (error) {
-      setError((error as AuthError).message)
-    } finally {
-      setLoading(false)
     }
+    setLoading(false)
+  }
+
+  // Nouvelle fonction pour réinitialiser le mot de passe
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    })
+
+    if (error) {
+      alert(error.message)
+    } else {
+      alert('Vérifiez votre email pour réinitialiser votre mot de passe')
+      setResetMode(false)
+    }
+    setLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Connexion
-          </h2>
-        </div>
+        <h2 className="text-center text-3xl font-bold">
+          {resetMode ? 'Réinitialiser le mot de passe' : 'Connexion'}
+        </h2>
         
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          {error && (
-            <div className="bg-red-100 p-3 rounded text-red-700">
-              {error}
-            </div>
-          )}
-          
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="mt-1 appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
+        <form className="mt-8 space-y-6" onSubmit={resetMode ? handleResetPassword : handleLogin}>
+          <div>
+            <label>Email</label>
+            <input
+              type="email"
+              required
+              className="w-full p-2 border rounded"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-            <div className="mt-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Mot de passe
-              </label>
+          {/* Afficher le champ mot de passe uniquement en mode connexion */}
+          {!resetMode && (
+            <div>
+              <label>Mot de passe</label>
               <input
-                id="password"
-                name="password"
                 type="password"
                 required
-                className="mt-1 appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                value={formData.password}
-                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-          </div>
+          )}
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {loading ? 'Connexion...' : 'Se connecter'}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          >
+            {loading 
+              ? 'Chargement...' 
+              : resetMode 
+                ? 'Envoyer le lien de réinitialisation'
+                : 'Se connecter'
+            }
+          </button>
 
-          <div className="text-center">
-            <Link 
-              href="/signup"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              Pas encore de compte ? S&apos;inscrire
-            </Link>
-          </div>
+          {/* Bouton pour basculer entre les modes */}
+          <button
+            type="button"
+            onClick={() => setResetMode(!resetMode)}
+            className="w-full text-blue-500 hover:text-blue-600"
+          >
+            {resetMode 
+              ? 'Retour à la connexion' 
+              : 'Mot de passe oublié ?'
+            }
+          </button>
+
+          <Link href="/signup" className="block text-center text-blue-500 hover:text-blue-600">
+            Pas de compte ? S&apos;inscrire
+          </Link>
         </form>
       </div>
     </div>
