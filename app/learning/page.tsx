@@ -3,28 +3,15 @@
 //import Image from 'next/image'
 import Link from 'next/link'
 
-const Test = () => { 
-
-    //const [number, setNumber] = useState(0)
-
-    return(
-        <div>
-        <div className="flex flex-col gap-2 p-8 sm:flex-row sm:items-center sm:gap-6 sm:py-4 ...">
-            <img className="mx-auto block h-24 rounded-full sm:mx-0 sm:shrink-0" src="/img/logo.jpg" alt="" />
-            <div className="space-y-2 text-center sm:text-left">
-                <div className="space-y-0.5">
-                    <p className="text-lg font-semibold text-black">Erin Lindford</p>
-                    <p className="font-medium text-gray-500">Product Engineer</p>
-                </div>
-                <button className="border-purple-200 text-purple-600 hover:border-transparent hover:bg-purple-600 hover:text-white active:bg-purple-700 ...">
-                    Message
-                </button>
-            </div>
-            <Link href="../profile">Profile</Link>
-
-        </div>
-        </div>
-    )
+export default function Test() {
+  return (
+    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full hover:scale-105 transition-transform">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Test Tailwind</h1>
+        <p className="text-gray-600">
+          Si vous voyez cette carte avec un dégradé en arrière-plan, des ombres, et une animation au survol, Tailwind fonctionne correctement ! 🎉
+        </p>
+      </div>
+    </div>
+  )
 }
-
-export default Test
