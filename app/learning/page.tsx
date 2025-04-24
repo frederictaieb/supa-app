@@ -12,6 +12,9 @@ export default function Test() {
           Si vous voyez cette carte avec un dégradé en arrière-plan, des ombres, et une animation au survol, Tailwind fonctionne correctement ! 🎉
         </p>
       </div>
+      <div>
+        <Link href="../profile">Profile</Link>
+      </div>
     </div>
   )
 }
