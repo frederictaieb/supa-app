@@ -1,11 +1,13 @@
 "use client"
-//import { useState } from "react"
+import { useState } from "react"
 
-const test = () => {
+const test = () => { 
+
+    const [number, setNumber] = useState('0')
 
     return(
         <div>
-            Hello
+            Hello, le compteur est {number}
         </div>
     )
 }
