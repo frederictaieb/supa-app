@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react"
 //import Image from 'next/image'
+import Link from 'next/Link'
 
 const Test = () => { 
 
@@ -19,6 +20,8 @@ const Test = () => {
                     Message
                 </button>
             </div>
+            <Link href="../profile">Profile</Link>
+
         </div>
         </div>
     )
