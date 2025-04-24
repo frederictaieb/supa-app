@@ -7,8 +7,10 @@ const Test = () => {
 
     return(
         <div>
-            Hello, le compteur est {number}
-            <button onClick={() => setNumber(number+1)}>Increment</button>
+            <div>Hello, le compteur est {number}</div>
+            <div>
+                <button onClick={() => setNumber(number+1)}>Increment</button>
+            </div>
         </div>
     )
 }
