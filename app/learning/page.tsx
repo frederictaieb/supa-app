@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 const Test = () => { 
 
-    const [number, setNumber] = useState(0)
+    //const [number, setNumber] = useState(0)
 
     return(
         <div>
